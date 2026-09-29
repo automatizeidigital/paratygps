@@ -1,4 +1,4 @@
-const CACHE='paratygps-shell-v9',TILES='paratygps-tiles-v1',TILE_HOSTS=['tile.openstreetmap.org','tiles.openseamap.org'],MAX_TILES=4000,REFRESH_MS=14*864e5;const SHELL=['./','./index.html','./leaflet.css','./leaflet.js','./route.js','./history.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='paratygps-shell-v10',TILES='paratygps-tiles-v1',TILE_HOSTS=['tile.openstreetmap.org','tiles.openseamap.org'],MAX_TILES=4000,REFRESH_MS=14*864e5;const SHELL=['./','./index.html','./leaflet.css','./leaflet.js','./route.js','./history.js','./router.js','./chart-mask.bin','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==TILES).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 // Map tiles already viewed are kept on the device so the chart still shows at sea without signal.
