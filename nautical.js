@@ -60,11 +60,19 @@
       const date = sheet.correctionDate.split('/');
       info.textContent = `Folha ${sheet.id} · escala 1:${sheet.scale.toLocaleString('pt-BR')} · correção informada: ${date[1]}/${date[0]}/${date[2]} (${sheet.correction}). Confira atualizações e avisos antes de navegar.`;
     } else info.textContent = 'Mapa colaborativo online. As cartas salvas podem ser selecionadas acima.';
-    try { localStorage.setItem('paratygps-chart', select.value); } catch {}
+    try { localStorage.setItem('paratygps-chart-v2', select.value); } catch {}
     render();
   }
-  view.onclick = () => { if (sheet) map.fitBounds(sheet.bounds); };
-  select.onchange = changeSheet;
+  const frameChart = () => { if (sheet) map.fitBounds(sheet.bounds, {padding: [16, 16]}); };
+  view.onclick = frameChart;
+  // Focus on Paraty rather than the northern half of the regional sheet.
+  const frameBay = () => {
+    if (sheet?.id === '163301') map.fitBounds([[-23.27, -44.7335], [-23.08, -44.53]], {padding: [12, 12]});
+    else if (sheet) frameChart();
+    else map.setView([-23.205, -44.66], 12);
+  };
+  $('homeBtn').onclick = frameBay;
+  select.onchange = () => { changeSheet(); frameBay(); };
   map.on('moveend zoomend', render);
   window.addEventListener('offline', updateCoverage);
   window.addEventListener('online', () => {
@@ -110,11 +118,12 @@
       manifest = await response.json();
       const total = manifest.sheets.flatMap(s => s.chunks).reduce((n, c) => n + c.bytes, 0);
       save.textContent = `↓ Salvar cartas offline (${(total / 1048576).toFixed(1).replace('.', ',')} MB)`;
-      let preference = '163302';
-      try { preference = localStorage.getItem('paratygps-chart') || preference; } catch {}
-      select.value = ['online', ...manifest.sheets.map(s => s.id)].includes(preference) ? preference : '163302';
+      let preference = '163301';
+      try { preference = localStorage.getItem('paratygps-chart-v2') || preference; } catch {}
+      select.value = ['online', ...manifest.sheets.map(s => s.id)].includes(preference) ? preference : '163301';
       select.disabled = save.disabled = remove.disabled = false;
       changeSheet();
+      frameBay();
       message(await isSaved() ? 'As duas folhas estão salvas para uso offline neste aparelho.' : 'Para usar sem internet, salve as duas folhas neste aparelho.');
     } catch { message('Não foi possível carregar as cartas. Confira a conexão e recarregue.'); }
   }

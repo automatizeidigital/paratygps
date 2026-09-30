@@ -63,3 +63,9 @@ A migração `supabase/migrations/20260930040039_manual_access_approval.sql` cri
 O aplicativo verifica a liberação antes de carregar o mapa, ao recuperar conexão/foco e a cada minuto. Conta pendente/suspensa abre `access.html`. A navegação offline exige aprovação consultada nas últimas 24 horas; registros offline antigos sem aprovação são invalidados. A suspensão no banco é imediata; um aparelho desconectado só percebe a suspensão ao conectar ou esgotar esse prazo. Como toda aplicação estática, o cache e os arquivos locais não são um mecanismo DRM contra manipulação do navegador; o banco aplica autorização independentemente do cliente.
 
 `tests/access-rls.sql` verifica as permissões reais do banco em uma transação revertida: pendência inicial, cadastro Google, metadados forjados, autoliberação bloqueada, aprovação, suspensão, RLS, proteção do master e auditoria.
+
+## Mapa amplo e tela cheia
+
+A folha principal 163301 é aberta por padrão e enquadrada pela sua cobertura geográfica, incluindo a baía de Paraty e a região. A 163302 continua disponível como detalhe da baía, com data de correção própria. A preferência antiga foi substituída por `paratygps-chart-v2` para que instalações que abriam o detalhe recebam o novo padrão. “Ver baía” aproxima a área de Paraty na folha principal, e “Ver carta” enquadra toda a folha selecionada; a carta nunca é esticada para além das coordenadas originais.
+
+“Abrir mapa em tela cheia” no painel de GPS e “Tela cheia” no mapa usam o mesmo mapa Leaflet, mantendo GPS, percurso, pontos e roteiro. Há comandos de marcar ponto e iniciar/parar percurso em tela cheia. “Voltar aos ajustes” retorna ao painel. Em navegadores sem Fullscreen API, o mapa ocupa a área do aplicativo; Escape e o botão Voltar também fecham esse modo.

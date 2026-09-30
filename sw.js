@@ -1,5 +1,5 @@
-const CACHE = 'paratygps-shell-v8';
-const SHELL = ['./', './index.html', './login.html', './access.html', './admin.html', './access.js', './admin.js', './access.css', './login.css', './login.js', './auth-config.js', './auth-core.js', './app-auth.js', './app.js', './vendor/supabase-2.117.2.js', './leaflet.css', './leaflet.js', './route.js', './history.js', './nautical.js', './charts/1633/manifest.json', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'paratygps-shell-v9';
+const SHELL = ['./', './index.html', './login.html', './access.html', './admin.html', './access.js', './admin.js', './access.css', './login.css', './login.js', './auth-config.js', './auth-core.js', './app-auth.js', './app.js', './vendor/supabase-2.117.2.js', './leaflet.css', './leaflet.js', './route.js', './history.js', './nautical.js', './map-display.js', './charts/1633/manifest.json', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });

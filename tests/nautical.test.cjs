@@ -19,7 +19,7 @@ async function scenario({failAt = -1, existing = new Map()} = {}) {
   const map = {
     createPane() {}, getPane: () => ({style: {}}), on() {},
     getBounds: () => ({intersects: () => extent, pad() {return this;}}),
-    fitBounds() {extent = true;}
+    fitBounds() {extent = true;}, setView() {extent = true;}
   };
   const window = {paratyMap: map, caches, isSecureContext: true, addEventListener(name, callback) {events[name] = callback;}};
   const response = {ok: true, headers: new Map([['content-type', 'image/webp']]), clone() {return this;}, blob: async () => ({})};
@@ -42,11 +42,11 @@ async function scenario({failAt = -1, existing = new Map()} = {}) {
 }
 (async () => {
   let app = await scenario();
-  assert.equal(app.get('chartLayer').value, '163302');
-  assert.equal(app.layers.size, 9);
-  app.get('chartLayer').value = '163301'; app.get('chartLayer').onchange(); await tick();
+  assert.equal(app.get('chartLayer').value, '163301');
   assert.equal(app.layers.size, 20);
-  assert.match(app.get('chartInfo').textContent, /16\/04\/2026/);
+  app.get('chartLayer').value = '163302'; app.get('chartLayer').onchange(); await tick();
+  assert.equal(app.layers.size, 9);
+  assert.match(app.get('chartInfo').textContent, /04\/02\/2022/);
   app.get('chartLayer').value = 'online'; app.get('chartLayer').onchange();
   assert.equal(app.layers.size, 0);
   app = await scenario({failAt: 3});
@@ -69,7 +69,7 @@ async function scenario({failAt = -1, existing = new Map()} = {}) {
   const listeners = {}, deleted = [];
   vm.runInNewContext(fs.readFileSync('sw.js', 'utf8'), {
     self: {addEventListener(name, callback) {listeners[name] = callback;}, clients: {claim: async () => {}}},
-    caches: {keys: async () => ['paratygps-shell-v5', 'paratygps-shell-v8', 'paratygps-charts-test', 'other-app'], delete: async name => deleted.push(name)}
+    caches: {keys: async () => ['paratygps-shell-v5', 'paratygps-shell-v9', 'paratygps-charts-test', 'other-app'], delete: async name => deleted.push(name)}
   });
   let work; listeners.activate({waitUntil(promise) {work = promise;}}); await work;
   assert.deepEqual(deleted, ['paratygps-shell-v5']);

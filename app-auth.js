@@ -84,7 +84,7 @@
     });
     // Size the map only after the application is visible.
     document.documentElement.classList.remove('auth-pending'); status.hidden = true;
-    for (const script of ['./leaflet.js', './app.js', './nautical.js', './route.js', './history.js']) await load(script);
+    for (const script of ['./leaflet.js', './app.js', './nautical.js', './route.js', './history.js', './map-display.js']) await load(script);
     if (window.paratyMap) window.paratyMap.invalidateSize();
   } catch {
     status.hidden = false; status.textContent = 'Não foi possível abrir o sistema. Recarregue a página.';
