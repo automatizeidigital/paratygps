@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const map=window.paratyMap,L=window.L;if(!map||!L)return;
-const $=id=>document.getElementById(id),key='paratygps-history-v1';let trips=[],active=null,overlay=null,startMarker=null,endMarker=null,current=null;
+const $=id=>document.getElementById(id),key=window.paratyStorageKey('paratygps-history-v1');let trips=[],active=null,overlay=null,startMarker=null,endMarker=null,current=null;
 const valid=p=>p&&Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&Math.abs(p.lat)<=90&&Math.abs(p.lng)<=180;
 try{const v=JSON.parse(localStorage.getItem(key));if(Array.isArray(v))trips=v.filter(t=>t&&Array.isArray(t.points)&&t.points.length>=2).map(t=>({...t,points:t.points.filter(valid)})).filter(t=>t.points.length>=2).slice(0,30)}catch{}
 function nm(a,b){const r=Math.PI/180,dlat=(b.lat-a.lat)*r,dlng=(b.lng-a.lng)*r,x=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlng/2)**2;return 3440.065*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}

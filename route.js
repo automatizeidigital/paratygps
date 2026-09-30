@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const map=window.paratyMap, L=window.L;
 if(!map||!L)return;
-const el=id=>document.getElementById(id), key='paratygps-route-v1';
+const el=id=>document.getElementById(id), key=window.paratyStorageKey('paratygps-route-v1');
 let route={start:null,end:null,via:[]},mode=null,drawn=[],line=null;
 try{const value=JSON.parse(localStorage.getItem(key));if(value&&typeof value==='object')route={start:valid(value.start),end:valid(value.end),via:Array.isArray(value.via)?value.via.map(valid).filter(Boolean).slice(0,50):[]}}catch{}
 function valid(p){return p&&Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&Math.abs(p.lat)<=90&&Math.abs(p.lng)<=180?{lat:p.lat,lng:p.lng}:null}

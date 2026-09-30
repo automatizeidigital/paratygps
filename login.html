@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071c2a"><title>Entrar — ParatyGPS</title>
+<link rel="icon" href="./icon-192.png"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./login.css">
+<script defer src="./vendor/supabase-2.117.2.js"></script><script defer src="./auth-config.js"></script><script defer src="./auth-core.js"></script><script defer src="./login.js"></script>
+</head>
+<body>
+<main class="auth-layout">
+<section class="intro" aria-label="ParatyGPS">
+<a class="brand" href="./login.html"><img src="./icon-192.png" alt="" width="48" height="48"><span>PARATYGPS<small>GPS marítimo · Paraty, RJ</small></span></a>
+<div class="intro-copy"><span class="eyebrow">Sua próxima saída começa aqui</span><h1>A baía na palma<br>da sua mão.</h1><p>Acompanhe sua posição, organize seus pontos e mantenha seus percursos em uma conta só sua.</p><div class="feature"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4m0 14v4M1 12h4m14 0h4"/></svg></span><div><strong>Encontre seu caminho</strong><small>Carta náutica da região de Paraty.</small></div></div><div class="feature"><span>↗</span><div><strong>Guarde suas experiências</strong><small>Pontos e percursos separados por usuário neste aparelho.</small></div></div><div class="feature"><span>↓</span><div><strong>Prepare-se para ficar offline</strong><small>Salve as cartas antes de sair com a embarcação.</small></div></div></div>
+<p class="intro-foot">Planeje com cuidado. Confira carta atualizada, marés e condições de navegação.</p>
+</section>
+<section class="form-side" aria-labelledby="authTitle">
+<div class="auth-card">
+<span class="eyebrow">Bem-vindo ao ParatyGPS</span><h2 id="authTitle">Entre na sua conta</h2><p id="authDescription" class="muted">Seus pontos e percursos esperam por você.</p>
+<div class="tabs" role="tablist" aria-label="Acesso"><button type="button" id="loginTab" role="tab" aria-selected="true" aria-controls="authForm">Entrar</button><button type="button" id="signupTab" role="tab" aria-selected="false" aria-controls="authForm">Criar conta</button></div>
+<button class="google-btn" id="googleBtn" type="button"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.5-.2-2.2H12v4.2h5.4a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.7 2.9-4.2 2.9-7.7z"/><path fill="#34A853" d="M12 22c2.7 0 5-1 6.7-2.5l-3.3-2.6c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.8-5.6-4.2H3v2.7A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.4 13.6a6 6 0 0 1 0-3.2V7.7H3a10 10 0 0 0 0 8.6z"/><path fill="#EA4335" d="M12 6.2c1.5 0 2.8.5 3.8 1.5l2.9-2.9A9.6 9.6 0 0 0 12 2a10 10 0 0 0-9 5.7l3.4 2.7c.8-2.4 3-4.2 5.6-4.2z"/></svg>Continuar com Google</button>
+<p class="google-note" id="googleNote" hidden></p><div class="separator"><span>ou use seu e-mail</span></div>
+<form id="authForm">
+<div id="nameField" hidden><label for="fullName">Seu nome</label><input id="fullName" name="name" autocomplete="name" maxlength="60" placeholder="Como podemos chamar você?"></div>
+<div id="emailField"><label for="email">E-mail</label><input type="email" id="email" name="email" autocomplete="username" maxlength="254" required placeholder="voce@exemplo.com"></div>
+<div id="passwordField"><label for="password">Senha</label><div class="password-input"><input type="password" id="password" name="password" autocomplete="current-password" required maxlength="128" placeholder="Digite sua senha"><button type="button" id="showPassword" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button></div><small id="passwordHint" hidden>Use pelo menos 8 caracteres.</small></div>
+<div id="confirmField" hidden><label for="confirmPassword">Confirme a senha</label><input type="password" id="confirmPassword" autocomplete="new-password" maxlength="128" placeholder="Repita sua senha"></div>
+<button class="primary" id="submitBtn" type="submit">Entrar</button>
+</form>
+<p id="authMessage" role="status" aria-live="polite"></p>
+<button class="text-btn" id="forgotBtn" type="button">Esqueci minha senha</button><button class="text-btn" id="backBtn" type="button" hidden>Voltar para entrar</button>
+<button class="offline-btn" id="offlineBtn" type="button" hidden>Abrir meus dados offline neste aparelho</button>
+<p class="account-note">O primeiro acesso e o cadastro precisam de internet. Seus pontos e percursos ficam salvos neste aparelho.</p>
+</div>
+<footer>ParatyGPS · Navegação local</footer>
+</section>
+</main>
+<noscript>Ative o JavaScript no navegador para entrar no ParatyGPS.</noscript>
+</body></html>

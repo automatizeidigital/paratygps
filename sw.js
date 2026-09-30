@@ -1,5 +1,5 @@
-const CACHE = 'paratygps-shell-v6';
-const SHELL = ['./', './index.html', './leaflet.css', './leaflet.js', './route.js', './history.js', './nautical.js', './charts/1633/manifest.json', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'paratygps-shell-v7';
+const SHELL = ['./', './index.html', './login.html', './login.css', './login.js', './auth-config.js', './auth-core.js', './app-auth.js', './app.js', './vendor/supabase-2.117.2.js', './leaflet.css', './leaflet.js', './route.js', './history.js', './nautical.js', './charts/1633/manifest.json', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
@@ -10,7 +10,8 @@ self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (u.origin !== self.location.origin || e.request.method !== 'GET') return;
   if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).catch(() => caches.open(CACHE).then(c => c.match('./index.html'))));
+    const page = u.pathname.endsWith('/login.html') ? './login.html' : './index.html';
+    e.respondWith(fetch(e.request).catch(() => caches.open(CACHE).then(c => c.match(page))));
     return;
   }
   e.respondWith(caches.match(e.request).then(v => v || fetch(e.request)));

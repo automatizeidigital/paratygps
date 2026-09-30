@@ -69,7 +69,7 @@ async function scenario({failAt = -1, existing = new Map()} = {}) {
   const listeners = {}, deleted = [];
   vm.runInNewContext(fs.readFileSync('sw.js', 'utf8'), {
     self: {addEventListener(name, callback) {listeners[name] = callback;}, clients: {claim: async () => {}}},
-    caches: {keys: async () => ['paratygps-shell-v5', 'paratygps-shell-v6', 'paratygps-charts-test', 'other-app'], delete: async name => deleted.push(name)}
+    caches: {keys: async () => ['paratygps-shell-v5', 'paratygps-shell-v7', 'paratygps-charts-test', 'other-app'], delete: async name => deleted.push(name)}
   });
   let work; listeners.activate({waitUntil(promise) {work = promise;}}); await work;
   assert.deepEqual(deleted, ['paratygps-shell-v5']);
