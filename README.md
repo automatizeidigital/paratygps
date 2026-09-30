@@ -37,7 +37,7 @@ A conta administradora master solicitada tem o papel `master_admin` em `app_meta
 
 Pontos, percursos, histórico e rascunhos continuam locais e passam a usar chaves com o ID de cada usuário; esta alteração não implementa sincronização na nuvem. No primeiro login online do master, os dados locais anteriores são transferidos para sua conta. Novos usuários começam com dados separados. A cópia offline das cartas é compartilhada no aparelho porque não contém dados pessoais.
 
-Sem internet, a última conta verificada neste navegador pode abrir apenas seus dados locais e cartas já salvas. Esse modo não concede autorização para operações no servidor nem funções administrativas. Sair da conta remove o acesso offline lembrado; pontos e viagens permanecem separados por usuário para o próximo login. Em aparelhos compartilhados, os dados locais não são criptografados e podem ser inspecionados por quem controla o navegador.
+Sem internet, a última conta liberada e verificada nas últimas 24 horas neste navegador pode abrir seus dados locais e cartas já salvas. Esse modo não concede autorização para operações no servidor nem funções administrativas. Sair da conta remove o acesso offline lembrado; pontos e viagens permanecem separados por usuário para o próximo login. Em aparelhos compartilhados, os dados locais não são criptografados e podem ser inspecionados por quem controla o navegador.
 
 ### Ativar Google e links de confirmação
 
@@ -53,3 +53,13 @@ O provedor Google estava desativado na implantação desta alteração. O botão
 ### Verificação
 
 `node tests/nautical.test.cjs` verifica cartas e armazenamento. `node tests/auth.test.cjs` verifica identificação do master, separação de dados e bloqueio de sessões inválidas. Também foram verificados em Chromium: redirecionamento de acesso anônimo, login real do master, migração local, mapa, logout, reabertura offline, layout mobile e cadastro simulado. O fluxo de consentimento Google exige a configuração acima e ainda não foi executado de ponta a ponta.
+
+## Liberação comercial por revenda
+
+Toda conta nova (e-mail ou Google) recebe status `pending` por trigger em `auth.users`. Confirmar o e-mail não libera a plataforma. O administrador master usa `admin.html` (link Gerenciar acessos no mapa) para liberar ou suspender clientes após a contratação com a revenda. Não há cobrança automática nesta versão.
+
+A migração `supabase/migrations/20260930040039_manual_access_approval.sql` cria registros privados, auditoria das alterações e RPCs autenticadas. Apenas a função protegida por papel master verificado no banco pode alterar permissões. Nenhuma chave privilegiada fica no navegador. Políticas restritivas exigem aprovação atual nas quatro tabelas de negócio, além da propriedade existente. A conta master é protegida contra suspensão.
+
+O aplicativo verifica a liberação antes de carregar o mapa, ao recuperar conexão/foco e a cada minuto. Conta pendente/suspensa abre `access.html`. A navegação offline exige aprovação consultada nas últimas 24 horas; registros offline antigos sem aprovação são invalidados. A suspensão no banco é imediata; um aparelho desconectado só percebe a suspensão ao conectar ou esgotar esse prazo. Como toda aplicação estática, o cache e os arquivos locais não são um mecanismo DRM contra manipulação do navegador; o banco aplica autorização independentemente do cliente.
+
+`tests/access-rls.sql` verifica as permissões reais do banco em uma transação revertida: pendência inicial, cadastro Google, metadados forjados, autoliberação bloqueada, aprovação, suspensão, RLS, proteção do master e auditoria.

@@ -8,15 +8,23 @@
   api.url = page => new URL(page, base).href;
   api.storageKey = (id, name) => `paratygps-user:${id}:${name}`;
   api.roleLabel = user => user?.app_metadata?.role === 'master_admin' ? 'Administrador master' : 'Usuário';
-  api.remember = user => {
-    try { localStorage.setItem(offlineKey, JSON.stringify({id: user.id, email: user.email, verifiedAt: Date.now()})); } catch {}
+  api.remember = (user, access) => {
+    if (access?.status !== 'active') return;
+    try { localStorage.setItem(offlineKey, JSON.stringify({id: user.id, email: user.email, verifiedAt: Date.now(), approved: true, isMaster: access.is_master === true})); } catch {}
   };
   api.offlineAccount = () => {
     try {
       const value = JSON.parse(localStorage.getItem(offlineKey));
-      if (value && /^[0-9a-f-]{36}$/i.test(value.id) && typeof value.email === 'string' && Number.isFinite(value.verifiedAt)) return value;
+      if (value && /^[0-9a-f-]{36}$/i.test(value.id) && typeof value.email === 'string' && value.approved === true && Number.isFinite(value.verifiedAt) && Date.now() >= value.verifiedAt && Date.now() - value.verifiedAt < 86400000) return value;
     } catch {}
     return null;
+  };
+  api.forgetApproval = () => { try { localStorage.removeItem(offlineKey); } catch {} };
+  api.access = async () => {
+    const {data, error} = await api.client.rpc('platform_access_status');
+    if (error) throw error;
+    if (!data || !['pending', 'active', 'suspended'].includes(data.status)) throw new Error('Invalid access response');
+    return data;
   };
   api.clearSession = () => {
     try { localStorage.removeItem(offlineKey); localStorage.removeItem(config.storageKey); localStorage.removeItem(config.storageKey + '-code-verifier'); } catch {}

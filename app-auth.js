@@ -2,9 +2,10 @@
   'use strict';
   const auth = window.ParatyAuth;
   const status = document.getElementById('authLoading');
-  const redirect = () => location.replace(auth.url('login.html'));
+  let redirecting = false;
+  const redirect = () => { if (!redirecting) { redirecting = true; location.replace(auth.url('login.html')); } };
   if (!auth?.client) { status.textContent = 'Não foi possível carregar o acesso. Recarregue a página.'; return; }
-  let user, offline = !navigator.onLine;
+  let user, access, offline = !navigator.onLine;
   try {
     if (offline) user = auth.offlineAccount();
     else {
@@ -18,10 +19,21 @@
       } else user = data.user;
     }
     if (!user) { redirect(); return; }
-    if (!offline) auth.remember(user);
+    if (!offline) {
+      try { access = await auth.access(); }
+      catch (error) {
+        if ((!error.status || error.status >= 500) && auth.offlineAccount()?.id === user.id) { user = auth.offlineAccount(); offline = true; }
+        else { status.textContent = 'Conecte-se à internet para verificar a liberação do administrador.'; return; }
+      }
+      if (!offline && access.status !== 'active') { auth.forgetApproval(); location.replace(auth.url('access.html')); return; }
+      if (!offline) auth.remember(user, access);
+    }
+    const isMaster = !offline && access?.is_master === true;
+    const adminLink = document.getElementById('adminLink');
+    adminLink.hidden = !isMaster;
     window.paratyStorageKey = name => auth.storageKey(user.id, name);
     window.paratyCurrentUser = {id: user.id, email: user.email, offline};
-    if (!offline && user.app_metadata?.role === 'master_admin') {
+    if (isMaster) {
       // The existing installation belongs to the master. Preserve its local
       // data on first authenticated use, without assigning it to new users.
       for (const name of ['paraty-nautica-v1', 'paratygps-route-v1', 'paratygps-history-v1']) {
@@ -34,7 +46,7 @@
       }
     }
     document.getElementById('accountEmail').textContent = user.email;
-    document.getElementById('accountRole').textContent = offline ? 'Offline · dados deste aparelho' : auth.roleLabel(user);
+    document.getElementById('accountRole').textContent = offline ? 'Offline · dados deste aparelho' : isMaster ? 'Administrador master' : 'Usuário liberado';
     document.getElementById('logoutBtn').onclick = async () => {
       document.getElementById('logoutBtn').disabled = true;
       try { if (navigator.onLine) await auth.client.auth.signOut({scope: 'local'}); }
@@ -46,6 +58,26 @@
       if (event === 'SIGNED_OUT') { auth.clearSession(); redirect(); }
       else if (session?.user?.id && session.user.id !== user.id) location.reload();
     });
+    let checking = false;
+    const recheck = async () => {
+      if (checking) return;
+      if (!navigator.onLine) {
+        if (!auth.offlineAccount()) location.replace(auth.url('access.html'));
+        return;
+      }
+      checking = true;
+      try {
+        const current = await auth.access();
+        if (current.status !== 'active') { auth.forgetApproval(); location.replace(auth.url('access.html')); }
+        else if (current.is_master !== isMaster || offline) location.reload();
+        else auth.remember(user, current);
+      } catch {
+        if (!auth.offlineAccount()) location.replace(auth.url('access.html'));
+      } finally { checking = false; }
+    };
+    window.addEventListener('online', recheck);
+    window.addEventListener('focus', recheck);
+    setInterval(recheck, 60000);
     const load = src => new Promise((resolve, reject) => {
       const script = document.createElement('script'); script.src = src;
       script.onload = resolve; script.onerror = reject; document.body.append(script);

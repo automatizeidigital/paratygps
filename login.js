@@ -63,12 +63,12 @@
       if (mode === 'login') {
         const {data, error} = await auth.client.auth.signInWithPassword({email, password}); if (error) throw error;
         if (!data.user || !data.session) throw new Error('No session');
-        auth.remember(data.user); location.replace(auth.url('index.html')); return;
+        location.replace(auth.url('index.html')); return;
       }
       if (mode === 'signup') {
         const {data, error} = await auth.client.auth.signUp({email, password, options: {emailRedirectTo: auth.url('login.html'), data: {full_name: $('fullName').value.trim().slice(0, 60)}}}); if (error) throw error;
         $('password').value = $('confirmPassword').value = '';
-        if (data.session && data.user) { auth.remember(data.user); location.replace(auth.url('index.html')); return; }
+        if (data.session && data.user) { location.replace(auth.url('index.html')); return; }
         say('Confira seu e-mail para confirmar o cadastro. Se a conta já existir, use “Entrar” ou recupere sua senha.'); return;
       }
       if (mode === 'recover') {
@@ -92,7 +92,7 @@
     }
     if (data.session && navigator.onLine) {
       const {data: verified, error: verifyError} = await auth.client.auth.getUser();
-      if (!verifyError && verified.user) { auth.remember(verified.user); location.replace(auth.url('index.html')); }
+      if (!verifyError && verified.user) { location.replace(auth.url('index.html')); }
     }
   } catch (error) { say(auth.message(error), true); }
 })();
