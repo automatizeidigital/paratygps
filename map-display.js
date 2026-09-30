@@ -8,7 +8,8 @@
   wrap.before(placeholder);
   let expanded = false, historyAdded = false, scrollPosition = 0;
   const dialog = $('pointNameDialog'), input = $('pointNameInput');
-  window.paratyAskPointName = defaultName => {
+  window.paratyAskPointName = (defaultName, title = 'Salvar ponto') => {
+    $('pointDialogTitle').textContent = title;
     if (dialog.open) return Promise.resolve(null);
     return new Promise(resolve => {
       let result = null;

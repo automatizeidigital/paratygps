@@ -13,22 +13,23 @@
       if (error) {
         // Only transport failures may fall back to local-only data. An invalid
         // or revoked session must return to login, even with a remembered ID.
-        const transport = !error.status || error.status >= 500;
+        const transport = auth.isTransportError(error);
         if (transport && auth.offlineAccount()) { user = auth.offlineAccount(); offline = true; }
         else { auth.clearSession(); redirect(); return; }
       } else user = data.user;
     }
-    if (!user) { redirect(); return; }
+    if (!user) { auth.forgetApproval(); redirect(); return; }
     if (!offline) {
       try { access = await auth.access(); }
       catch (error) {
-        if ((!error.status || error.status >= 500) && auth.offlineAccount()?.id === user.id) { user = auth.offlineAccount(); offline = true; }
+        if (auth.isTransportError(error) && auth.offlineAccount()?.id === user.id) { user = auth.offlineAccount(); offline = true; }
+        else if (!auth.isTransportError(error)) { auth.clearSession(); redirect(); return; }
         else { status.textContent = 'Conecte-se à internet para verificar a liberação do administrador.'; return; }
       }
       if (!offline && access.status !== 'active') { auth.forgetApproval(); location.replace(auth.url('access.html')); return; }
       if (!offline) auth.remember(user, access);
     }
-    const isMaster = !offline && access?.is_master === true;
+    let isMaster = !offline && access?.is_master === true;
     const adminLink = document.getElementById('adminLink');
     adminLink.hidden = !isMaster;
     window.paratyStorageKey = name => auth.storageKey(user.id, name);
@@ -67,19 +68,29 @@
       }
       checking = true;
       try {
+        const verified = await auth.client.auth.getUser();
+        if (verified.error) throw verified.error;
+        if (!verified.data.user || verified.data.user.id !== user.id) { auth.forgetApproval(); location.reload(); return; }
         const current = await auth.access();
         if (current.status !== 'active') { auth.forgetApproval(); location.replace(auth.url('access.html')); }
-        else if (current.is_master !== isMaster || offline) location.reload();
-        else auth.remember(user, current);
-      } catch {
-        if (!auth.offlineAccount()) location.replace(auth.url('access.html'));
+        else {
+          user = verified.data.user; offline = false; isMaster = current.is_master === true;
+          window.paratyCurrentUser.offline = false;
+          document.getElementById('accountEmail').textContent = user.email;
+          document.getElementById('accountRole').textContent = isMaster ? 'Administrador master' : 'Usuário liberado';
+          adminLink.hidden = !isMaster; auth.remember(user, current);
+        }
+      } catch (error) {
+        if (!auth.isTransportError(error)) { auth.clearSession(); redirect(); }
+        else if (!auth.offlineAccount()) location.replace(auth.url('access.html'));
       } finally { checking = false; }
     };
+    window.addEventListener('pageshow', event => { if (event.persisted) { document.documentElement.classList.add('auth-pending'); document.querySelector('.mapwrap').hidden = true; location.reload(); } });
     window.addEventListener('online', recheck);
     window.addEventListener('focus', recheck);
     setInterval(recheck, 60000);
     const load = src => new Promise((resolve, reject) => {
-      const script = document.createElement('script'); script.src = src + '?v=10';
+      const script = document.createElement('script'); script.src = src + '?v=11';
       script.onload = resolve; script.onerror = reject; document.body.append(script);
     });
     // Size the map only after the application is visible.

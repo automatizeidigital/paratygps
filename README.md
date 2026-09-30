@@ -60,3 +60,7 @@ O aplicativo verifica a liberação antes de carregar o mapa, ao recuperar conex
 “Abrir mapa em tela cheia” no painel e “Tela cheia” no mapa expandem o mapa para toda a área do aplicativo, sem depender da Fullscreen API. O mesmo elemento Leaflet é movido para fora do painel e mantém GPS, percurso, pontos e roteiro. Há comandos de marcar ponto e iniciar/parar percurso. “Voltar aos ajustes”, Escape e Voltar restauram a posição do mapa e do painel. As barras do navegador continuam sob controle do aparelho.
 
 Os scripts do mapa usam URLs com versão e são atualizados pela rede, com cache como alternativa offline, para evitar mistura entre uma página nova e scripts antigos.
+
+## Auditoria e regressões
+
+Consulte `AUDIT.md` para as correções, evidências, limites e pendências de 30/09/2026. O GPS exige posição recente para iniciar gravação e permanece no mesmo mapa ao recuperar conexão. Falhas de armazenamento são informadas e dados em memória podem ser exportados. Sessões encerradas são verificadas no banco; cabeçalhos de proteção são definidos em `vercel.json`.

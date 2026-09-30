@@ -1,6 +1,6 @@
-const CACHE = 'paratygps-shell-v10';
-const VERSIONED_SCRIPTS = ['leaflet.js', 'app.js', 'app-auth.js', 'map-display.js', 'route.js', 'history.js'].map(name => './' + name + '?v=10');
-const SHELL = ['./', './index.html', './login.html', './access.html', './admin.html', './access.js', './admin.js', './access.css', './login.css', './login.js', './auth-config.js', './auth-core.js', './app-auth.js', './app.js', './vendor/supabase-2.117.2.js', './leaflet.css', './leaflet.js', './route.js', './history.js', './map-display.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'paratygps-shell-v11';
+const VERSIONED_SCRIPTS = ['leaflet.js', 'app.js', 'app-auth.js', 'map-display.js', 'route.js', 'history.js', 'pwa.js'].map(name => './' + name + '?v=11');
+const SHELL = ['./', './index.html', './login.html', './access.html', './admin.html', './access.js', './admin.js', './access.css', './login.css', './login.js', './auth-config.js', './auth-core.js', './app-auth.js', './app.js', './vendor/supabase-2.117.2.js', './leaflet.css', './leaflet.js', './route.js', './history.js', './map-display.js', './pwa.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll([...SHELL, ...VERSIONED_SCRIPTS])).then(() => self.skipWaiting()));
 });

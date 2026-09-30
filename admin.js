@@ -1,11 +1,12 @@
 (async () => {
   'use strict';
   const auth = window.ParatyAuth, $ = id => document.getElementById(id);
-  let users = [], busy = false;
+  let users = [], busy = false, identity = null, redirecting = false;
+  const redirect = () => { if (!redirecting) { redirecting = true; location.replace(auth.url('login.html')); } };
   const labels = {pending:'Pendente',active:'Liberado',suspended:'Suspenso'};
   const message = text => { $('adminMessage').textContent = text; };
   if (!auth?.client) { message('Recarregue a página para tentar novamente.'); return; }
-  $('logoutBtn').onclick = async () => { try { await auth.client.auth.signOut({scope:'local'}); } finally { auth.clearSession(); location.replace(auth.url('login.html')); } };
+  $('logoutBtn').onclick = async () => { try { await auth.client.auth.signOut({scope:'local'}); } finally { auth.clearSession(); redirect(); } };
   const render = () => {
     $('users').replaceChildren();
     const query = $('search').value.trim().toLocaleLowerCase('pt-BR'), filter = $('filter').value;
@@ -44,8 +45,9 @@
     $('refreshBtn').disabled=true;
     try {
       const {data,error}=await auth.client.auth.getUser();
-      if(!data.user && !error){location.replace(auth.url('login.html'));return;}
+      if(!data.user && !error){redirect();return;}
       if(error) throw error;
+      identity = data.user.id;
       const access=await auth.access();
       if(!access.is_master){$('adminControls').hidden=true;users=[];render();message('Somente o administrador master pode gerenciar acessos.');return;}
       const result=await auth.client.rpc('platform_list_access');if(result.error) throw result.error;
@@ -54,5 +56,12 @@
     finally{$('refreshBtn').disabled=false;}
   };
   $('refreshBtn').onclick=()=>refresh();$('search').oninput=render;$('filter').onchange=render;
+  auth.client.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (identity && session?.user?.id && session.user.id !== identity)) {
+      users = []; $('users').replaceChildren(); $('adminControls').hidden = true;
+      redirect();
+    }
+  });
+  window.addEventListener('pageshow', event => { if (event.persisted) { users = []; $('adminControls').hidden = true; render(); refresh(); } });
   await refresh();
 })();

@@ -20,6 +20,8 @@
     return null;
   };
   api.forgetApproval = () => { try { localStorage.removeItem(offlineKey); } catch {} };
+  api.isTransportError = error => Number(error?.status) >= 500 ||
+    (!error?.status && /fetch|network|timeout|abort|load failed/i.test(error?.message || ''));
   api.access = async () => {
     const {data, error} = await api.client.rpc('platform_access_status');
     if (error) throw error;

@@ -22,7 +22,9 @@
     document.querySelector('.separator').hidden = mode === 'recover' || mode === 'reset';
     $('loginTab').setAttribute('aria-selected', String(mode === 'login'));
     $('signupTab').setAttribute('aria-selected', String(signup));
-    $('password').value = $('confirmPassword').value = ''; say('');
+    $('password').value = $('confirmPassword').value = '';
+    $('password').type = 'password'; $('showPassword').textContent = 'Mostrar';
+    $('showPassword').setAttribute('aria-pressed', 'false'); $('showPassword').setAttribute('aria-label', 'Mostrar senha'); say('');
   }
   const setBusy = value => {
     busy = value; $('authForm').setAttribute('aria-busy', String(value));

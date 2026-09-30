@@ -42,3 +42,13 @@ async function setup({user=normal,error=null,online=true,remembered=null,legacy=
  app.values.set('paratygps-offline-account',JSON.stringify({...normal,verifiedAt:Date.now()}));assert.equal(app.api.offlineAccount(),null);
  console.log('PASS: pending/suspended gates, offline entitlement expiry, legacy entitlement rejection, server-owned role, per-user storage, master migration, invalid-session blocking, account changes and offline logout');
 })().catch(error=>{console.error(error);process.exitCode=1;});
+
+// Authorization failures without an HTTP status are not network outages.
+(async()=>{
+ const app=await setup();
+ assert.equal(app.api.isTransportError({code:'42501',message:'permission denied'}),false);
+ assert.equal(app.api.isTransportError({code:'session_not_found',message:'Session missing'}),false);
+ assert.equal(app.api.isTransportError({message:'Failed to fetch'}),true);
+ assert.equal(app.api.isTransportError({status:503,message:'Service unavailable'}),true);
+ console.log('PASS: permission/session failures cannot use transport fallback');
+})().catch(e=>{console.error(e);process.exitCode=1;});
