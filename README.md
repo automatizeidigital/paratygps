@@ -10,24 +10,15 @@ Aplicativo PWA de GPS marítimo para a baía de Paraty (RJ).
 - Mapa OpenStreetMap com camada colaborativa OpenSeaMap.
 - Instalação na tela inicial por manifesto e service worker.
 
-Abra `index.html` por um servidor HTTPS para permitir geolocalização e instalação como PWA. O mapa colaborativo requer internet; as folhas da carta 1633 podem ser baixadas para uso offline conforme instruções abaixo. Os dados náuticos colaborativos não substituem cartas atualizadas e avisos aos navegantes da Marinha do Brasil.
+Abra `index.html` por um servidor HTTPS para permitir geolocalização e instalação como PWA. O mapa colaborativo requer internet. Os dados náuticos colaborativos não substituem cartas atualizadas e avisos aos navegantes da Marinha do Brasil.
 
 Aplicativo publicado: https://paratygps.vercel.app
 
-## Carta 1633 e uso offline
+## Mapa e uso offline
 
-As duas folhas do arquivo `1633_0.zip` fornecido pelo usuário estão disponíveis no seletor **Carta náutica 1633**:
+O projeto utiliza o mapa online OpenStreetMap com balizamento colaborativo OpenSeaMap. As imagens, controles e ferramentas de conversão da carta 1633 foram removidos. A atualização do service worker elimina as cópias antigas dessas cartas, preservando pontos, percursos e dados por conta.
 
-- **163302 — Baía de Paraty e adjacências:** escala 1:20.000; correção informada no KAP: 04/02/2022, aviso 2022-17.
-- **163301 — Baía da Ilha Grande, parte oeste:** escala 1:40.075; correção informada no KAP: 16/04/2026, aviso 2026-24.
-
-Selecione a folha e use **Ver carta** para enquadrar sua cobertura. **Salvar cartas offline** baixa as duas folhas completas, aproximadamente 2 MB. Aguarde a confirmação antes de sair da área com internet. A tela, as cartas salvas, os pontos e os percursos podem ser reabertos offline no mesmo navegador/aparelho. O mapa colaborativo externo continua dependente de internet; fora da cobertura das folhas, não existe fundo cartográfico offline. O navegador pode remover o armazenamento local se faltar espaço.
-
-As datas são metadados do arquivo recebido, sem confirmação de que incluem todos os avisos posteriores. A folha de Paraty tem correção mais antiga que a folha geral. A carta não valida automaticamente roteiros, profundidade disponível, maré ou calado.
-
-### Conversão reproduzível
-
-`python3 tools/convert_charts.py /diretorio/dos/KAP` requer rasterio, numpy e Pillow. A conversão mantém todos os pixels em WebP sem perdas, divididos em blocos de 2048 pixels carregados por área visível. O ajuste em Mercator esférico usa os 100 pontos REF de cada KAP; o maior resíduo é inferior a 0,02 pixel. O manifesto registra SHA-256 da fonte e resultado do ajuste. Isso verifica a transformação matemática, não a exatidão hidrográfica da fonte.
+O fundo do mapa depende de internet. Sem conexão, os dados locais continuam disponíveis por até 24 horas após a verificação da liberação; a tela informa quando o mapa está indisponível.
 
 ## Acesso e contas
 
@@ -35,9 +26,9 @@ O aplicativo abre `login.html` antes de carregar o mapa. A tela permite login po
 
 A conta administradora master solicitada tem o papel `master_admin` em `app_metadata`, definido por operação administrativa no servidor. A senha não é distribuída no código e nenhum endpoint público de criação de administradores foi instalado. `user_metadata` não determina permissões. O papel da aplicação não equivale a superusuário do banco, e as políticas existentes continuam protegendo os registros por proprietário.
 
-Pontos, percursos, histórico e rascunhos continuam locais e passam a usar chaves com o ID de cada usuário; esta alteração não implementa sincronização na nuvem. No primeiro login online do master, os dados locais anteriores são transferidos para sua conta. Novos usuários começam com dados separados. A cópia offline das cartas é compartilhada no aparelho porque não contém dados pessoais.
+Pontos, percursos, histórico e rascunhos continuam locais e passam a usar chaves com o ID de cada usuário; esta alteração não implementa sincronização na nuvem. No primeiro login online do master, os dados locais anteriores são transferidos para sua conta. Novos usuários começam com dados separados.
 
-Sem internet, a última conta liberada e verificada nas últimas 24 horas neste navegador pode abrir seus dados locais e cartas já salvas. Esse modo não concede autorização para operações no servidor nem funções administrativas. Sair da conta remove o acesso offline lembrado; pontos e viagens permanecem separados por usuário para o próximo login. Em aparelhos compartilhados, os dados locais não são criptografados e podem ser inspecionados por quem controla o navegador.
+Sem internet, a última conta liberada e verificada nas últimas 24 horas neste navegador pode abrir seus dados locais. Esse modo não concede autorização para operações no servidor nem funções administrativas. Sair da conta remove o acesso offline lembrado; pontos e viagens permanecem separados por usuário para o próximo login. Em aparelhos compartilhados, os dados locais não são criptografados e podem ser inspecionados por quem controla o navegador.
 
 ### Ativar Google e links de confirmação
 
@@ -52,7 +43,7 @@ O provedor Google estava desativado na implantação desta alteração. O botão
 
 ### Verificação
 
-`node tests/nautical.test.cjs` verifica cartas e armazenamento. `node tests/auth.test.cjs` verifica identificação do master, separação de dados e bloqueio de sessões inválidas. Também foram verificados em Chromium: redirecionamento de acesso anônimo, login real do master, migração local, mapa, logout, reabertura offline, layout mobile e cadastro simulado. O fluxo de consentimento Google exige a configuração acima e ainda não foi executado de ponta a ponta.
+`node tests/sw.test.cjs` verifica atualização e limpeza dos caches antigos. `node tests/auth.test.cjs` verifica identificação do master, separação de dados e bloqueio de sessões inválidas. Também foram verificados em Chromium: redirecionamento de acesso anônimo, login real do master, migração local, mapa, logout, reabertura offline, layout mobile e cadastro simulado. O fluxo de consentimento Google exige a configuração acima e ainda não foi executado de ponta a ponta.
 
 ## Liberação comercial por revenda
 
@@ -60,12 +51,12 @@ Toda conta nova (e-mail ou Google) recebe status `pending` por trigger em `auth.
 
 A migração `supabase/migrations/20260930040039_manual_access_approval.sql` cria registros privados, auditoria das alterações e RPCs autenticadas. Apenas a função protegida por papel master verificado no banco pode alterar permissões. Nenhuma chave privilegiada fica no navegador. Políticas restritivas exigem aprovação atual nas quatro tabelas de negócio, além da propriedade existente. A conta master é protegida contra suspensão.
 
-O aplicativo verifica a liberação antes de carregar o mapa, ao recuperar conexão/foco e a cada minuto. Conta pendente/suspensa abre `access.html`. A navegação offline exige aprovação consultada nas últimas 24 horas; registros offline antigos sem aprovação são invalidados. A suspensão no banco é imediata; um aparelho desconectado só percebe a suspensão ao conectar ou esgotar esse prazo. Como toda aplicação estática, o cache e os arquivos locais não são um mecanismo DRM contra manipulação do navegador; o banco aplica autorização independentemente do cliente.
+O aplicativo verifica a liberação antes de carregar o mapa, ao recuperar conexão/foco e a cada minuto. Conta pendente/suspensa abre `access.html`. O acesso aos dados locais offline exige aprovação consultada nas últimas 24 horas; registros offline antigos sem aprovação são invalidados. A suspensão no banco é imediata; um aparelho desconectado só percebe a suspensão ao conectar ou esgotar esse prazo. Como toda aplicação estática, o cache e os arquivos locais não são um mecanismo DRM contra manipulação do navegador; o banco aplica autorização independentemente do cliente.
 
 `tests/access-rls.sql` verifica as permissões reais do banco em uma transação revertida: pendência inicial, cadastro Google, metadados forjados, autoliberação bloqueada, aprovação, suspensão, RLS, proteção do master e auditoria.
 
-## Mapa amplo e tela cheia
+## Mapa em tela cheia
 
-A folha principal 163301 é aberta por padrão e enquadrada pela sua cobertura geográfica, incluindo a baía de Paraty e a região. A 163302 continua disponível como detalhe da baía, com data de correção própria. A preferência antiga foi substituída por `paratygps-chart-v2` para que instalações que abriam o detalhe recebam o novo padrão. “Ver baía” aproxima a área de Paraty na folha principal, e “Ver carta” enquadra toda a folha selecionada; a carta nunca é esticada para além das coordenadas originais.
+“Abrir mapa em tela cheia” no painel e “Tela cheia” no mapa expandem o mapa para toda a área do aplicativo, sem depender da Fullscreen API. O mesmo elemento Leaflet é movido para fora do painel e mantém GPS, percurso, pontos e roteiro. Há comandos de marcar ponto e iniciar/parar percurso. “Voltar aos ajustes”, Escape e Voltar restauram a posição do mapa e do painel. As barras do navegador continuam sob controle do aparelho.
 
-“Abrir mapa em tela cheia” no painel de GPS e “Tela cheia” no mapa usam o mesmo mapa Leaflet, mantendo GPS, percurso, pontos e roteiro. Há comandos de marcar ponto e iniciar/parar percurso em tela cheia. “Voltar aos ajustes” retorna ao painel. Em navegadores sem Fullscreen API, o mapa ocupa a área do aplicativo; Escape e o botão Voltar também fecham esse modo.
+Os scripts do mapa usam URLs com versão e são atualizados pela rede, com cache como alternativa offline, para evitar mistura entre uma página nova e scripts antigos.

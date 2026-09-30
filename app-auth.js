@@ -79,12 +79,12 @@
     window.addEventListener('focus', recheck);
     setInterval(recheck, 60000);
     const load = src => new Promise((resolve, reject) => {
-      const script = document.createElement('script'); script.src = src;
+      const script = document.createElement('script'); script.src = src + '?v=10';
       script.onload = resolve; script.onerror = reject; document.body.append(script);
     });
     // Size the map only after the application is visible.
     document.documentElement.classList.remove('auth-pending'); status.hidden = true;
-    for (const script of ['./leaflet.js', './app.js', './nautical.js', './route.js', './history.js', './map-display.js']) await load(script);
+    for (const script of ['./leaflet.js', './app.js', './map-display.js', './route.js', './history.js']) await load(script);
     if (window.paratyMap) window.paratyMap.invalidateSize();
   } catch {
     status.hidden = false; status.textContent = 'Não foi possível abrir o sistema. Recarregue a página.';
